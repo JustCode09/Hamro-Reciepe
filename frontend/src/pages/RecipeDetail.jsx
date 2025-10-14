@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_URL = "https://hamro-reciepe.onrender.com";
+
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,7 +14,7 @@ export default function RecipeDetail() {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/recipes/${id}`);
+        const res = await axios.get(`${API_URL}/api/recipes/${id}`);
         setRecipe(res.data);
       } catch (err) {
         console.log("Fetch recipe error:", err);
@@ -35,7 +37,7 @@ export default function RecipeDetail() {
     const token = ensureAuth();
     if (!token) return;
     try {
-      await axios.delete(`http://localhost:5000/api/recipes/${id}`, {
+      await axios.delete(`${API_URL}/api/recipes/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Recipe deleted successfully!");
@@ -54,7 +56,7 @@ export default function RecipeDetail() {
     <div className="max-w-3xl mx-auto mt-10 bg-white shadow p-6 rounded-xl">
       {recipe.image && (
         <img
-          src={`http://localhost:5000${recipe.image}`}
+          src={`${API_URL}${recipe.image}`}
           alt={recipe.title}
           className="w-full h-72 object-cover rounded-xl mb-4"
         />

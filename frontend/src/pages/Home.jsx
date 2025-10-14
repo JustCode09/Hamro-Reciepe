@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { API_URL } from "../config/api";
 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
@@ -8,7 +9,7 @@ export default function Home() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/recipes");
+        const res = await axios.get(`${API_URL}/api/recipes`);
         setRecipes(res.data);
       } catch (err) {
         console.log(err);
