@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config/api";
 
 export default function AddRecipe() {
   const [form, setForm] = useState({
@@ -17,25 +18,28 @@ export default function AddRecipe() {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      const formData = new FormData();
-      for (let key in form) formData.append(key, form[key]);
-      if (image) formData.append("image", image);
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    
+    // Append all form fields
+    for (let key in form) formData.append(key, form[key]);
+    if (image) formData.append("image", image);
 
-      await axios.post("http://localhost:5000/api/recipes", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      alert("Recipe added successfully!");
-      navigate("/");
-    } catch (err) {
-      alert(err.response?.data?.error || "Error adding recipe");
-    }
-  };
+    // ✅ FIX: Send formData instead of form
+    await axios.post(`${API_URL}/api/recipes`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    alert("Recipe added successfully!");
+    navigate("/");
+  } catch (err) {
+    alert(err.response?.data?.error || "Error adding recipe");
+  }
+};
 
   return (
     <div className="max-w-xl mx-auto bg-white shadow-md p-6 mt-10 rounded-xl">

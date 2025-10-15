@@ -34,7 +34,7 @@ export default function Home() {
             {/* Recipe Image */}
             {r.image && (
               <img
-                src={`http://localhost:5000${r.image}`}
+                src={`https://hamro-reciepe.onrender.com${r.image}`}
                 alt={r.title}
                 className="h-48 w-full object-cover rounded-lg mb-3"
               />

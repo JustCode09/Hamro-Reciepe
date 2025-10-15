@@ -1,26 +1,46 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_URL = "https://hamro-reciepe.onrender.com";
+
 export default function EditRecipe() {
-  const { id } = useParams();
-  const [form, setForm] = useState({});
-  const [image, setImage] = useState(null);
+  const { id } = useParams(); // Use the ID from URL params
   const navigate = useNavigate();
+  
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    ingredients: "",
+    steps: "",
+    category: "",
+  });
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRecipe = async () => {
-      const res = await axios.get(`http://localhost:5000/api/recipes/${id}`);
-      setForm({
-        title: res.data.title,
-        description: res.data.description,
-        ingredients: res.data.ingredients.join(","),
-        steps: res.data.steps.join("."),
-        category: res.data.category,
-      });
+      try {
+        const res = await axios.get(`${API_URL}/api/recipes/${id}`);
+        const recipe = res.data;
+        
+        // Convert arrays back to strings for the form
+        setForm({
+          title: recipe.title || "",
+          description: recipe.description || "",
+          ingredients: recipe.ingredients?.join(", ") || "",
+          steps: recipe.steps?.join(". ") || "",
+          category: recipe.category || "",
+        });
+        setLoading(false);
+      } catch (err) {
+        console.log("Error fetching recipe:", err);
+        alert("Recipe not found");
+        navigate("/");
+      }
     };
     fetchRecipe();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,12 +49,20 @@ export default function EditRecipe() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please login first");
+        return;
+      }
+
       const formData = new FormData();
       for (let key in form) formData.append(key, form[key]);
       if (image) formData.append("image", image);
 
-      await axios.put(`http://localhost:5000/api/recipes/${id}`, formData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+      await axios.put(`${API_URL}/api/recipes/${id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
       alert("Recipe updated successfully!");
       navigate(`/recipe/${id}`);
@@ -42,6 +70,8 @@ export default function EditRecipe() {
       alert(err.response?.data?.error || "Error updating recipe");
     }
   };
+
+  if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
     <div className="max-w-xl mx-auto bg-white shadow-md p-6 mt-10 rounded-xl">
@@ -53,33 +83,39 @@ export default function EditRecipe() {
         <input
           type="text"
           name="title"
-          value={form.title || ""}
+          placeholder="Recipe Title"
+          value={form.title}
           onChange={handleChange}
           className="border p-2 w-full rounded"
+          required
         />
         <textarea
           name="description"
-          value={form.description || ""}
+          placeholder="Short Description"
+          value={form.description}
           onChange={handleChange}
           className="border p-2 w-full rounded"
         />
         <input
           type="text"
           name="ingredients"
-          value={form.ingredients || ""}
+          placeholder="Ingredients (comma separated)"
+          value={form.ingredients}
           onChange={handleChange}
           className="border p-2 w-full rounded"
         />
         <textarea
           name="steps"
-          value={form.steps || ""}
+          placeholder="Steps (separate with a period)"
+          value={form.steps}
           onChange={handleChange}
           className="border p-2 w-full rounded"
         />
         <input
           type="text"
           name="category"
-          value={form.category || ""}
+          placeholder="Category (e.g. Dessert, Nepali, Indian)"
+          value={form.category}
           onChange={handleChange}
           className="border p-2 w-full rounded"
         />
@@ -91,7 +127,7 @@ export default function EditRecipe() {
           className="border p-2 w-full rounded"
         />
 
-        <button className="bg-yellow-500 text-white px-4 py-2 rounded w-full hover:bg-yellow-600">
+        <button className="bg-orange-500 text-white px-4 py-2 rounded w-full hover:bg-orange-600">
           Update Recipe
         </button>
       </form>

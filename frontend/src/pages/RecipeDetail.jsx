@@ -5,7 +5,7 @@ import axios from "axios";
 const API_URL = "https://hamro-reciepe.onrender.com";
 
 export default function RecipeDetail() {
-  const { id } = useParams();
+  const { id } = useParams(); // This is the correct ID from the URL
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -48,6 +48,11 @@ export default function RecipeDetail() {
     }
   };
 
+  const handleEdit = () => {
+    // Use the ID from URL params instead of recipe._id
+    navigate(`/edit/${id}`);
+  };
+
   if (!recipe) return <p className="text-center mt-10">Loading...</p>;
 
   const isCreator = recipe.createdBy?._id === user?.id;
@@ -82,7 +87,7 @@ export default function RecipeDetail() {
       {isCreator && (
         <div className="flex gap-3 mt-4">
           <button
-            onClick={() => navigate(`/edit/${recipe._id}`)}
+            onClick={handleEdit} // Use the fixed handleEdit function
             className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
           >
             Edit
